@@ -1,0 +1,51 @@
+zone security INTERNAL
+ex
+zone security EXTERNAL
+ex
+
+access-list 101 deny ip 10.11.12.64 0.0.0.7 any      
+access-list 101 deny ip 10.11.12.72 0.0.0.7 any
+access-list 101 deny ip 10.11.12.80 0.0.0.7 any
+access-list 101 deny tcp 10.11.12.0 0.0.0.7 any eq 20
+access-list 101 deny tcp 10.11.12.0 0.0.0.7 any eq 21
+access-list 101 deny tcp 10.11.12.56 0.0.0.7 any eq 80
+access-list 101 deny tcp 10.11.12.56 0.0.0.7 any eq 443
+access-list 101 permit ip any any
+
+class-map type inspect match-any IN-TO-OUT
+match access-group 101
+ 
+policy-map type inspect IN-TO-OUT-POLICY
+class type inspect IN-TO-OUT
+inspect
+
+zone-pair security ZP-IN-TO-OUT source INTERNAL destination EXTERNAL
+service-policy type inspect IN-TO-OUT-POLICY
+
+access-list 102 permit udp host 10.11.12.121 host 10.11.12.113 eq 500
+access-list 102 permit esp host 10.11.12.121 host 10.11.12.113
+
+
+class-map type inspect match-any VPN-TO-IN
+match access-group 102
+
+policy-map type inspect OUT-TO-IN-POLICY
+class type inspect VPN-TO-IN
+pass
+
+zone-pair security ZP-OUT-TO-IN source EXTERNAL destination INTERNAL
+service-policy type inspect OUT-TO-IN-POLICY
+
+int s0/1/1
+zone-member security INTERNAL
+
+int s0/2/0
+zone-member security INTERNAL
+
+int s0/2/1
+zone-member security INTERNAL
+
+int s0/1/0
+zone-member security EXTERNAL
+
+ 
