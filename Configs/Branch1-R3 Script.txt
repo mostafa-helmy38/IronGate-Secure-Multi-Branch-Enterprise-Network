@@ -1,0 +1,102 @@
+Branch1-R3 Script:
+
+en
+conf t
+
+hostname Branch1-R3
+enable secret cisco
+
+ip dhcp excluded-address 10.11.12.49 10.11.12.51
+ip dhcp excluded-address 10.11.12.81
+ip dhcp excluded-address 10.11.12.57
+
+ip dhcp pool Branch1-Ops
+ network 10.11.12.48 255.255.255.248
+ default-router 10.11.12.49
+ip dhcp pool Branch1-QA
+ network 10.11.12.56 255.255.255.248
+ default-router 10.11.12.57
+
+clock timezone EET 2
+
+username admin secret cisco
+
+ip domain-name cisco.com
+
+int g0/0/0
+ no sh
+
+int g0/0/0.70
+ encapsulation dot1Q 70
+ ip address 10.11.12.49 255.255.255.248
+
+int g0/0/0.80
+ encapsulation dot1Q 80
+ ip address 10.11.12.57 255.255.255.248
+
+int g0/0/0.110
+ encapsulation dot1Q 110
+ ip address 10.11.12.81 255.255.255.248
+
+int g0/0/0.150
+ encapsulation dot1Q 150
+
+int s0/1/0
+ no sh
+ ip address 10.11.12.113 255.255.255.252
+ ip ospf message-digest-key 1 md5 sief
+
+router ospf 1
+ area 0 authentication message-digest
+ passive-interface GigabitEthernet0/0/0
+ network 10.11.12.48 0.0.0.7 area 0
+ network 10.11.12.56 0.0.0.7 area 0
+ network 10.11.12.80 0.0.0.7 area 0
+ network 10.11.12.112 0.0.0.3 area 0
+
+banner motd *Unauthorized Access*
+
+logging 10.11.12.50
+
+line con 0
+ login local
+
+line vty 0 4
+ login local
+ transport input ssh
+
+ntp authentication-key 1 md5 cisco
+ntp authenticate
+ntp trusted-key 1
+ntp server 10.11.12.51
+ntp update-calendar
+
+access-list 160 permit ip 10.11.12.48 0.0.0.15 10.11.12.152 0.0.0.7
+access-list 160 permit ip 10.11.12.48 0.0.0.15 10.11.12.160 0.0.0.7
+
+phase 1 configuration:
+
+crypto isakmp policy 3
+authentication pre-share
+encryption aes 256
+group 5 
+hash sha 
+lifetime 3600
+
+crypto isakmp key cisco address 10.11.12.121
+
+phase 2 configuration:
+
+crypto ipsec transform-set Br1R3-Br2Edge esp-aes esp-sha-hmac 
+crypto ipsec security-association lifetime seconds 3600 
+
+crypto map vpn-map 1 ipsec-isakmp 
+set peer 10.11.12.121
+set pfs group5
+set security-association lifetime seconds 3600
+set transform-set Br1R3-Br2Edge
+match address 160
+
+int s0/1/0
+crypto map vpn-map
+

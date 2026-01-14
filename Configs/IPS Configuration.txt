@@ -1,0 +1,40 @@
+IPS Configuration:
+
+license boot level securityk9 
+do wr
+do reload
+
+en
+mkdir flash:IPS-DIR
+
+conf t
+ip ips name IPS-IOS
+ip ips config location flash:IPS-DIR
+
+ip ips signature-category 
+category all
+retired true
+ex
+category ios_ips basic
+retired false
+ex
+ex
+
+int s0/2/1
+ip ips IPS-IOS in
+ip ips IPS-IOS out
+
+ip ips signature-definition 
+signature 2004 0
+status
+enabled true
+retired false
+ex
+engine
+event-action produce-alert 
+event-action deny-packet-inline 
+ex
+ex
+ex
+
+

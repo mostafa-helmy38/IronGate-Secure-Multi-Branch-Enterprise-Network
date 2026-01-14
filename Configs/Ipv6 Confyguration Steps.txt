@@ -1,0 +1,35 @@
+Ipv6 steps on routers:
+1. Enable ipv6 routing engine by "ipv6 unicast-routing"
+2. Enter the interface and un shutdown it
+3. Enter the sub interface
+4. Tell it the vlan that dealing with by "encapsulation dot1q 'vlan-id' "
+5. Give it ipv6 by "ipv6 address --/64"
+6. Optional: give it link local ip by "ipv6 address -- link-local"
+7. Modify the RA message to use stateless dhcp by "ipv6 nd other-config-flag"
+8. Tell it the dhcp server by "ipv6 dhcp server 'pool-name' "
+
+##########################################
+
+Ipv6 steps on switchs:
+1. Enable the ipv6 engine by "sdm prefer dual-ipv4-and-ipv6 default"
+2. Save the configuration by "do wr"
+3. Reload the switch by "do reload"
+4. Enable ipv6 routing engine by "ipv6 unicast-routing"
+5. Enter the vlan interface 
+6. Assign it the ip by "ipv6 address --"
+7. Exit and tell the switch getaway by "ipv6 route ::/0 'getway-ip' "
+
+##########################################
+
+IPv6 Tunneling steps between two routers (must be configured on two routers):
+1. specify the tunnel interface by "int tunnel 'id' "
+2. specify the mode by "tunnel mode ipv6ip"
+3. specify the source ipv4 for encapsulation by "tunnel source 'public-interface-name' "
+4. specify the destination ipv4 for encapsulation by  "tunnel destination 'public-interface-ipv4' "
+5. assign the tunnel interface ipv6 address by "ipv6 address '' "
+6. do static routing for the remote tunnel interface by "ipv6 route 'subnet/64' 'remote-tunnel-ip' "
+
+notes:
+ipv6 address assigned to the two interfaces must be from the same subnet
+
+ 

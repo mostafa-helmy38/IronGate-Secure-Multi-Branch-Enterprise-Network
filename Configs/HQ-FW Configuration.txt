@@ -1,0 +1,74 @@
+HQ-FW Configuration:
+
+hostname HQ-FW
+domain-name helmy.com
+enable password helmy
+username kamel password kamel
+
+int g1/1
+ no sh
+ nameif OUTSIDE
+ security-level 0
+ ip address 10.11.12.134 255.255.255.252
+
+int g1/2
+ no sh
+ nameif INSIDE
+ security-level 100
+ ip address 10.11.12.97 255.255.255.248
+
+int g1/3
+ no sh
+ nameif DMZ
+ security-level 50
+ ip address 10.11.12.137 255.255.255.248
+
+object network SERVER-NAT
+ host 10.11.12.142
+ nat (DMZ,OUTSIDE) static 10.11.12.254
+
+object network INSIDE-LAN
+ subnet 10.11.12.96 255.255.255.248
+
+object network DMZ-LAN
+ subnet 10.11.12.136 255.255.255.248
+
+object network IN-NAT
+ subnet 10.11.12.96 255.255.255.248
+ nat (INSIDE,OUTSIDE) dynamic interface
+
+route OUTSIDE 0.0.0.0 0.0.0.0 10.11.12.133
+
+access-list OUTSIDE-IN extended permit icmp any object INSIDE-LAN echo-reply
+access-list OUTSIDE-IN extended permit icmp any object DMZ-LAN echo-reply
+access-list OUTSIDE-IN extended permit tcp any host 10.11.12.142 eq 80
+access-list OUTSIDE-IN extended permit tcp any host 10.11.12.142 eq 443
+access-list OUTSIDE-IN extended permit tcp any host 10.11.12.142 eq 20
+access-list OUTSIDE-IN extended permit tcp any host 10.11.12.142 eq 21
+access-list OUTSIDE-IN extended permit tcp any host 10.11.12.142 eq 25
+access-list OUTSIDE-IN extended permit tcp any host 10.11.12.142 eq 110
+
+access-list DMZ-IN extended deny icmp object DMZ-LAN object INSIDE-LAN echo
+access-list DMZ-IN extended permit icmp object DMZ-LAN object INSIDE-LAN echo-reply
+access-list DMZ-IN extended permit icmp object DMZ-LAN any echo
+access-list DMZ-IN extended permit tcp object DMZ-LAN eq 80 10.11.12.96 255.255.255.248
+access-list DMZ-IN extended permit tcp object DMZ-LAN eq 443 10.11.12.96 255.255.255.248
+access-list DMZ-IN extended permit tcp object DMZ-LAN eq 25 10.11.12.96 255.255.255.248
+access-list DMZ-IN extended permit tcp object DMZ-LAN eq 110 10.11.12.96 255.255.255.248
+access-list DMZ-IN extended permit tcp object DMZ-LAN eq 20 10.11.12.96 255.255.255.248
+access-list DMZ-IN extended permit tcp object DMZ-LAN eq 21 10.11.12.96 255.255.255.248
+access-list DMZ-IN extended permit tcp object DMZ-LAN eq 22 10.11.12.96 255.255.255.248
+
+access-group OUTSIDE-IN in interface OUTSIDE
+access-group DMZ-IN in interface DMZ
+
+aaa authentication ssh console LOCAL
+
+ssh 10.11.12.96 255.255.255.248 INSIDE
+
+dhcpd dns 8.8.8.8
+dhcpd lease 1800
+
+dhcpd address 10.11.12.98-10.11.12.102 INSIDE
+
+

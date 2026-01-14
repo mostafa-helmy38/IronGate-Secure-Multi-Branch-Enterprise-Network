@@ -1,0 +1,13 @@
+Privilege Configuration:
+
+enable secret level 2 h
+username h privilege 2 secret h
+privilege exec level 2 sh ru
+
+Role-Based Configuration:
+
+enable view
+conf t
+parser view HELMY
+secret HELMY
+commands exec include show ip route

@@ -1,0 +1,9 @@
+ipv6 access-list HELMY-IPV6-ACL
+permit icmp any 2000:12:34:2::/64 echo-request
+permit icmp any 2000:12:34:2::/64 echo-reply
+permit icmp any 2000:12:34:7::/64 echo-request
+permit tcp any 2000:12:34:7::/64 eq 22
+
+
+int g0/0/0.40
+ipv6 traffic-filter HELMY-IPV6-ACL in

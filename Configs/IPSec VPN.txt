@@ -1,0 +1,68 @@
+Branch1-R3:
+
+Intersting traffic:
+
+access-list 160 permit ip 10.11.12.48 0.0.0.15 10.11.12.152 0.0.0.7
+access-list 160 permit ip 10.11.12.48 0.0.0.15 10.11.12.160 0.0.0.7
+
+phase 1 configuration:
+
+crypto isakmp policy 3
+authentication pre-share
+encryption aes 256
+group 5 
+hash sha 
+lifetime 3600
+
+crypto isakmp key helmy address 10.11.12.121
+
+phase 2 configuration:
+
+crypto ipsec transform-set Br1R3-Br2Edge esp-aes esp-sha-hmac 
+crypto ipsec security-association lifetime seconds 3600 
+
+crypto map helmy-map 1 ipsec-isakmp 
+set peer 10.11.12.121
+set pfs group5
+set security-association lifetime seconds 3600
+set transform-set Br1R3-Br2Edge
+match address 160
+
+int s0/1/0
+crypto map helmy-map
+
+
+Branch2-Edge:
+
+Intersting traffic:
+
+access-list 160 permit ip 10.11.12.152 0.0.0.7 10.11.12.48 0.0.0.15
+access-list 160 permit ip 10.11.12.160 0.0.0.7 10.11.12.48 0.0.0.15
+
+phase 1 configuration:
+
+crypto isakmp policy 3
+authentication pre-share
+encryption aes 256
+group 5 
+hash sha 
+lifetime 3600
+
+crypto isakmp key helmy address 10.11.12.113
+
+phase 2 configuration:
+
+crypto ipsec transform-set Br1R3-Br2Edge esp-aes esp-sha-hmac 
+crypto ipsec security-association lifetime seconds 3600 
+
+crypto map helmy-map 1 ipsec-isakmp 
+set peer 10.11.12.113
+set pfs group5
+set security-association lifetime seconds 3600
+set transform-set Br1R3-Br2Edge
+match address 160
+
+int s0/1/0
+crypto map helmy-map
+
+ 

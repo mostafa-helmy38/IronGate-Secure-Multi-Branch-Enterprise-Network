@@ -1,0 +1,48 @@
+Layer 2 security steps:
+1. Shutdown all unused interfaces
+	int range <unused ports>
+	shutdown
+	switchport mode access
+
+2. Disable DTP on all ports
+	int range f0/1-24,g0/1-2
+	switchport nonegotiate
+
+2. Enable port-security on access ports
+	int range <>
+	switchport port-security
+	switchport port-security maximum <number of mac address allowed>
+	switchport port-security mac-address <sticky> or <mac-address>
+	switchport port-security violation <restrict> or <protect>
+	switchport port-security aging time 60
+	
+3. Put unused interfaces in unused vlan
+	vlan 566
+	name Black-Hole
+	int range f0/4-24,g0/2
+	switchport access vlan 566
+
+4. Enable dhcp snooping globally, by vlans and specify ports trusted, untrusted
+	ip dhcp snooping
+	ip dhcp snooping vlan 10,20,30
+	int g0/1
+	ip dhcp snooping trust
+	int range f0/1-3
+	ip dhcp snooping limit rate 6
+
+5. Enable dynamic arp inspection by vlans and specify ports trusted, untrusted 
+	ip arp inspection vlan <all vlans on the switch>
+	ip arp inspection validate src-mac dst-mac ip
+	int <trusted port> or range <trusted ports>
+	ip arp inspection trust
+
+
+7. Enable port-fast and bpduguard globaly, access and trunk ports
+	spanning-tree portfast default
+	spanning-tree portfast bpduguard default
+	int range f0/1-3,f0/9
+	spanning-tree portfast
+	spanning-tree bpduguard enable
+	int range g0/1
+	spanning-tree portfast trunk
+	

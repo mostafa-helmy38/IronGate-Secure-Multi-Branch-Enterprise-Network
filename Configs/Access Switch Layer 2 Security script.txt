@@ -1,0 +1,45 @@
+conf t
+
+vlan 566
+name Black-Hole
+ex
+
+ip dhcp snooping
+ip dhcp snooping vlan 50,60
+no ip dhcp snooping information option
+
+ip arp inspection vlan 50,60
+ip arp inspection validate src-mac dst-mac ip
+
+spanning-tree portfast default
+spanning-tree portfast bpduguard default
+
+int range f0/1-20,f0/23-24,g0/2
+shutdown
+switchport mode access
+switchport access vlan 566
+ex
+
+int range f0/21-22
+switchport port-security
+switchport port-security maximum 2
+switchport port-security violation protect
+switchport port-security aging time 20
+spanning-tree portfast
+spanning-tree bpduguard enable
+ip dhcp snooping limit rate 5
+ex
+
+int g0/1
+ip dhcp snooping trust
+ip arp inspection trust
+spanning-tree portfast trunk
+ex
+
+int range f0/1-24,g0/1-2
+switchport nonegotiate
+ex
+
+	
+
+	
